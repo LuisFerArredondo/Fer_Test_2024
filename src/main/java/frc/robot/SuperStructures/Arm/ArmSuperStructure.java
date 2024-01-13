@@ -34,7 +34,8 @@ public class ArmSuperStructure extends SubsystemBase {
   }
 
   public void setMode(ArmSuperStructureState.Arm_Modes wantedMode){
-    currentState.setWantedMode(wantedMode);
+    desiredState.setWantedMode(wantedMode);
+    currentState.setWantedMode(desiredState.getWantedMode());
   }
 
   public Rotation2d[] getAngleInverseKinematics(Translation2d desiredPose) {
@@ -88,21 +89,23 @@ public class ArmSuperStructure extends SubsystemBase {
     currentState.updateState();
     updateSubsystemsStates();
 
-    // TODO: check the logic of this
-    /*Here the states are supposed to change this way: 
+    
+    if(!currentState.areEqual(lastState)){
+     lastState = currentState;
+     //TODO: Log this change or display it somewhere
+    }
+
+    if(!lastState.areEqual(desiredState)){
+     currentState.updateState();
+    }
+   }
+}
+
+    /*
+    Here the states are supposed to change this way: 
      -desiredState -> it stores the mode commanded to the superstructure and the final state the robot should be at
      -currentState -> it changes depending on the actions of the robot trying to reach the state of the "desiredState"
      -lastState -> keeps track of the previous state of the "currentState" and the mode the robot was commanded to, stored in "desiredState"
 
      So basically the robot should keep track of its future, present and past
     **/
-    if(lastState.getWantedMode() != currentState.getWantedMode()){
-      desiredState = currentState; 
-    }
-
-  
-    if(!currentState.compareStates(lastState)){
-      lastState = currentState;
-    }    
-   }
-}
